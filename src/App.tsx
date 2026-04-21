@@ -233,7 +233,7 @@ Commodity Category: ${commodity}
 INPUT SUMMARY:
 Annual Turnover: €${turnover.toLocaleString()}
 Value of Goods at Risk of Prohibition: €${riskShipments.toLocaleString()}
-Manual Staff Effort: ${staffHours} hrs/month @ €${hourlyRate}/hr
+Manual Data Collection & Reporting: ${staffHours} hrs/month @ €${hourlyRate}/hr
 
 RISK ANALYSIS (WITHOUT TRACEX):
 - Potential Penalty Risk (4% cap): €${calculations.penaltyRiskWithout.toLocaleString()}
@@ -517,10 +517,10 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
       </header>
 
       {/* Main Container */}
-      <div className="max-w-[1400px] mx-auto p-5 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 pb-32">
+      <div className="max-w-[1400px] mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 xl:grid-cols-[340px_1fr] gap-6 md:gap-8 pb-32">
         
         {/* Sidebar Inputs */}
-        <section className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm self-start">
+        <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm self-start">
           <h2 className="text-base font-bold text-forest border-b-2 border-forest inline-block mb-6 uppercase tracking-wider">
             Operational Inputs
           </h2>
@@ -557,7 +557,7 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
             </div>
 
             <div className="input-group">
-              <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Manual Compliance (Hrs/Mo)</label>
+              <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Manual Data Collection & Reporting (Hrs/Month)</label>
               <input 
                 type="number" 
                 value={staffHours} 
@@ -627,14 +627,14 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
               <span className="text-[11px] font-extrabold text-gray-600 uppercase tracking-widest">Financial Penalty Risk</span>
               <Tooltip text="EU 2023/1115 Art. 25: Maximum fine of at least 4% of total annual Union turnover" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <div className="text-2xl font-black text-risk">
                   <AnimatedNumber value={calculations.penaltyRiskWithout} prefix="€" />
                 </div>
                 <div className="text-[9px] text-gray-400 uppercase mt-1">Without TraceX</div>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <div className="text-2xl font-black text-safe">€0</div>
                 <div className="text-[9px] text-gray-400 uppercase mt-1">Compliance Shield</div>
               </div>
@@ -647,14 +647,14 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
               <span className="text-[11px] font-extrabold text-gray-600 uppercase tracking-widest">Potential Market Prohibition</span>
               <Tooltip text="This value represents the potential loss of market access for non-compliant shipments under EUDR Article 3." />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <div className="text-2xl font-black text-risk">
                   <AnimatedNumber value={calculations.revenueRiskWithout} prefix="€" />
                 </div>
                 <div className="text-[9px] text-gray-400 uppercase mt-1">Direct Revenue Loss</div>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <div className="text-2xl font-black text-safe">€0</div>
                 <div className="text-[9px] text-gray-400 uppercase mt-1">Full Market Access</div>
               </div>
@@ -667,14 +667,14 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
               <span className="text-[11px] font-extrabold text-gray-600 uppercase tracking-widest">Operational Cost (Annual)</span>
               <Tooltip text="Labor costs associated with manual geolocation and due diligence collection" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <div className="text-2xl font-black text-risk">
                   <AnimatedNumber value={calculations.opCostWithout} prefix="€" />
                 </div>
                 <div className="text-[9px] text-gray-400 uppercase mt-1">Manual Labor</div>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <div className="text-2xl font-black text-safe">
                   <AnimatedNumber value={calculations.opCostWith} prefix="€" />
                 </div>
@@ -689,7 +689,7 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
               <span className="text-[11px] font-extrabold text-gray-600 uppercase tracking-widest">Audit Readiness Score</span>
               <Tooltip text="Weighted probability of passing a Competent Authority inspection" />
             </div>
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
               <div>
                 <div className="font-bold text-risk text-sm">{calculations.auditScoreWithout}/100</div>
                 <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
@@ -701,13 +701,13 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
                 </div>
                 <div className="text-[8px] text-risk/60 uppercase mt-1 font-bold">Insecure</div>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <div className="font-bold text-safe text-sm">98/100</div>
                 <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: "98%" }}
-                    className="h-full bg-safe ml-auto"
+                    className="h-full bg-safe sm:ml-auto"
                   />
                 </div>
                 <div className="text-[8px] text-safe/60 uppercase mt-1 font-bold">Ready</div>
@@ -764,33 +764,41 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
             className="fixed inset-0 z-[1000] bg-app-bg overflow-auto p-4 md:p-8"
           >
             <div className="max-w-6xl mx-auto">
-              <header className="flex justify-between items-center mb-8 border-b pb-6">
-                <div>
-                  <h1 className="text-3xl font-black text-forest flex items-center gap-3">
-                    <Lock size={28} />
+              <header className="flex flex-col md:flex-row justify-between items-center mb-8 border-b pb-6 gap-6">
+                <div className="text-center md:text-left">
+                  <h1 className="text-2xl md:text-3xl font-black text-forest flex flex-col md:flex-row items-center gap-2 md:gap-3">
+                    <Lock size={28} className="text-forest/60" />
                     Leads Dashboard
                   </h1>
-                  <p className="text-gray-500 text-sm mt-1">Regulatory Calculator Data Collection</p>
+                  <p className="text-gray-500 text-xs md:text-sm mt-1">Regulatory Calculator Data Collection</p>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                  <div className="text-center md:text-right hidden sm:block">
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">Admin Access</div>
-                    <div className="text-sm font-semibold">{user?.email}</div>
+                    <div className="text-sm font-semibold truncate max-w-[200px]">{user?.email}</div>
                   </div>
-                  <button 
-                    onClick={exportLeadsToCSV}
-                    className="flex items-center gap-2 px-4 py-2 bg-forest text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-forest/90 transition-colors shadow-sm"
-                  >
-                    <Download size={16} />
-                    Export CSV
-                  </button>
-                  <button 
-                    onClick={handleLogout}
-                    className="p-3 bg-white border border-gray-200 rounded-xl text-gray-500 hover:text-risk transition-colors shadow-sm"
-                    title="Logout"
-                  >
-                    <LogOut size={20} />
-                  </button>
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <button 
+                      onClick={exportLeadsToCSV}
+                      className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-forest text-white rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-forest/90 transition-colors shadow-sm"
+                    >
+                      <Download size={16} />
+                      Export CSV
+                    </button>
+                    <button 
+                      onClick={handleLogout}
+                      className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-risk transition-colors shadow-sm flex items-center justify-center"
+                      title="Logout"
+                    >
+                      <LogOut size={20} />
+                    </button>
+                    <button 
+                      onClick={() => setShowAdmin(false)}
+                      className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-forest transition-colors shadow-sm font-bold text-xs"
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
               </header>
 
