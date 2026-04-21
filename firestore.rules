@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && 
+             request.auth.token.email == "marketingtracextech@gmail.com" && 
+             request.auth.token.email_verified == true;
+    }
+
+    function isValidLead(data) {
+      return data.keys().hasAll(['name', 'email', 'phone', 'countryCode', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 200 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 200 &&
+             data.phone is string && data.phone.size() > 0 && data.phone.size() <= 30 &&
+             data.countryCode is string && data.countryCode.size() > 0 && data.countryCode.size() <= 10 &&
+             data.createdAt == request.time;
+    }
+
+    match /leads/{leadId} {
+      // Anyone can submit a lead, as long as it's valid
+      allow create: if isValidLead(request.resource.data);
+      
+      // Only the specified admin can view the leads
+      allow list, get: if isAdmin();
+      
+      // No updates or deletes allowed for now
+      allow update, delete: if false;
+    }
+  }
+}

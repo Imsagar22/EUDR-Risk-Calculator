@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "Lead": {
+      "title": "Lead",
+      "description": "Information collected from users who sign up to use the EUDR Risk Calculator.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "Work email address of the user."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number of the user."
+        },
+        "countryCode": {
+          "type": "string",
+          "description": "International country calling code."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the lead was created."
+        },
+        "turnover": {
+          "type": "number",
+          "description": "Annual turnover entered by the user."
+        },
+        "commodity": {
+          "type": "string",
+          "description": "Commodity category selected by the user."
+        },
+        "companySize": {
+          "type": "string",
+          "description": "Company size category selected by the user."
+        }
+      },
+      "required": ["name", "email", "phone", "countryCode", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Collection of business leads."
+    }
+  }
+}
