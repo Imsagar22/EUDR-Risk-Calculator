@@ -27,7 +27,8 @@ import {
   Mail,
   Linkedin,
   Twitter,
-  Link as LinkIcon
+  Link as LinkIcon,
+  HelpCircle
 } from 'lucide-react';
 
 import { 
@@ -321,13 +322,107 @@ const ShareModal = ({ isOpen, onClose, calculations }: { isOpen: boolean; onClos
   );
 };
 
+const TourGuide = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [step, setStep] = useState(0);
+
+  const steps = [
+    {
+      title: "Operational Data",
+      description: "Start by entering your company's core metrics: Turnover, Non-geolocated imports, and manual effort hours.",
+      target: "tour-inputs",
+      icon: <Activity className="text-forest" size={20} />
+    },
+    {
+      title: "Risk Analysis",
+      description: "As you type, these cards calculate your potential EUDR fines, revenue at risk, and administrative overhead.",
+      target: "tour-risk-cards",
+      icon: <AlertTriangle className="text-risk" size={20} />
+    },
+    {
+      title: "Readiness Score",
+      description: "Compare your current manual readiness vs. the automated performance targets with TraceX.",
+      target: "tour-gauges",
+      icon: <ShieldCheck className="text-safe" size={20} />
+    },
+    {
+      title: "Executive Summary",
+      description: "Review your global risk profile and potential savings in this comprehensive breakdown.",
+      target: "tour-summary",
+      icon: <CheckCircle2 className="text-forest" size={20} />
+    }
+  ];
+
+  const handleNext = () => {
+    if (step < steps.length - 1) {
+      setStep(step + 1);
+      const element = document.getElementById(steps[step + 1].target);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    } else {
+      onClose();
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[200] pointer-events-none"
+      >
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] pointer-events-auto" onClick={onClose} />
+        
+        <motion.div 
+          key={step}
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-2xl shadow-2xl w-[90%] max-w-sm pointer-events-auto border border-forest/20"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-gray-50 rounded-lg">
+              {steps[step].icon}
+            </div>
+            <div>
+              <h4 className="text-sm font-black text-ink uppercase tracking-tight">{steps[step].title}</h4>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">Step {step + 1} of {steps.length}</p>
+            </div>
+          </div>
+          
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+            {steps[step].description}
+          </p>
+          
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={onClose}
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-ink transition-colors"
+            >
+              Skip Tour
+            </button>
+            <button 
+              onClick={handleNext}
+              className="px-6 py-2 bg-forest text-white rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-forest/90 transition-shadow shadow-md shadow-forest/20"
+            >
+              {step === steps.length - 1 ? 'Finish' : 'Next Step'}
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 export default function App() {
   // --- State ---
-  const [turnover, setTurnover] = useState<number>(25000000);
-  const [riskShipments, setRiskShipments] = useState<number>(1200000);
-  const [staffHours, setStaffHours] = useState<number>(160);
-  const [hourlyRate, setHourlyRate] = useState<number>(65);
-  const [auditsPerYear, setAuditsPerYear] = useState<number>(4);
+  const [turnover, setTurnover] = useState<number>(0);
+  const [riskShipments, setRiskShipments] = useState<number>(0);
+  const [staffHours, setStaffHours] = useState<number>(0);
+  const [hourlyRate, setHourlyRate] = useState<number>(0);
+  const [auditsPerYear, setAuditsPerYear] = useState<number>(0);
   const [commodity, setCommodity] = useState<Commodity>('Coffee');
   const [companySize, setCompanySize] = useState<CompanySize>('Large Enterprise (250–999)');
   const [isRegistered, setIsRegistered] = useState(() => {
@@ -344,6 +439,15 @@ export default function App() {
   const [isLoadingLeads, setIsLoadingLeads] = useState(false);
   const [adminError, setAdminError] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+
+  useEffect(() => {
+    // Show tour automatically once on first registration session
+    if (isRegistered && !localStorage.getItem('eudr_tour_seen')) {
+      setShowTour(true);
+      localStorage.setItem('eudr_tour_seen', 'true');
+    }
+  }, [isRegistered]);
 
   const isAdmin = user?.email === 'marketingtracextech@gmail.com';
 
@@ -711,6 +815,14 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
         </div>
         <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 md:gap-4 w-full sm:w-auto">
           <button 
+            onClick={() => setShowTour(true)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-md text-[9px] md:text-[10px] font-bold uppercase tracking-wider transition-colors border border-white/10"
+          >
+            <HelpCircle size={14} />
+            Quick Tour
+          </button>
+          
+          <button 
             onClick={() => setShowShare(true)}
             className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-md text-[9px] md:text-[10px] font-bold uppercase tracking-wider transition-colors border border-white/10"
           >
@@ -744,7 +856,7 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-10 flex flex-col gap-10 pb-40 w-full items-stretch">
         
         {/* Horizontal Top Inputs */}
-        <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm w-full">
+        <section id="tour-inputs" className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm w-full transition-all">
           <div className="border-b border-gray-200 pb-2 mb-6">
             <h2 className="text-sm font-black text-forest uppercase tracking-[0.2em]">
               Operational Inputs
@@ -875,7 +987,7 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+          <div id="tour-risk-cards" className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             
             {/* Card: Financial Penalty Risk */}
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative group">
@@ -1003,7 +1115,7 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
             </div>
 
             {/* Card: Audit Readiness */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative group">
+            <div id="tour-gauges" className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative group">
                <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
                 <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                   <ShieldCheck size={80} />
@@ -1041,6 +1153,7 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
 
         {/* Summary Banner */}
         <motion.div 
+          id="tour-summary"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-forest p-8 rounded-3xl text-white shadow-2xl relative overflow-hidden w-full"
@@ -1318,6 +1431,11 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
         isOpen={showShare} 
         onClose={() => setShowShare(false)} 
         calculations={calculations} 
+      />
+
+      <TourGuide
+        isOpen={showTour}
+        onClose={() => setShowTour(false)}
       />
     </div>
   );
