@@ -71,6 +71,8 @@ interface Lead {
 // --- Components ---
 
 const RiskComparisonChart = ({ withoutVal, withVal, colorRisk, colorSafe }: { withoutVal: number; withVal: number; colorRisk: string; colorSafe: string }) => {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  
   const data = [
     { name: 'Without TraceX', value: withoutVal, color: colorRisk },
     { name: 'With TraceX', value: withVal, color: colorSafe }
@@ -79,25 +81,47 @@ const RiskComparisonChart = ({ withoutVal, withVal, colorRisk, colorSafe }: { wi
   return (
     <div className="h-24 w-full mt-4">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart layout="vertical" data={data} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+        <BarChart 
+          layout="vertical" 
+          data={data} 
+          margin={{ top: 0, right: 10, left: -20, bottom: 0 }}
+          onMouseLeave={() => setHoveredIndex(null)}
+        >
           <XAxis type="number" hide />
           <YAxis dataKey="name" type="category" hide />
           <RechartsTooltip 
-            cursor={{ fill: 'transparent' }}
+            cursor={{ fill: 'rgba(0,0,0,0.02)' }}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 return (
-                  <div className="bg-gray-900 text-white text-[10px] px-2 py-1 rounded shadow-xl font-mono">
-                    €{payload[0].value.toLocaleString()}
+                  <div className="bg-gray-900 text-white text-[10px] px-2 py-1 rounded shadow-xl font-mono border border-white/10">
+                    <span className="opacity-60 mr-1">{payload[0].payload.name}:</span>
+                    <span className="font-bold font-mono text-safe-light tracking-tighter">€{payload[0].value.toLocaleString()}</span>
                   </div>
                 );
               }
               return null;
             }}
           />
-          <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
+          <Bar 
+            dataKey="value" 
+            radius={[0, 6, 6, 0]} 
+            barSize={20}
+            onMouseMove={(state) => {
+              if (state && state.activeTooltipIndex !== undefined) {
+                setHoveredIndex(state.activeTooltipIndex);
+              }
+            }}
+          >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.8} />
+              <Cell 
+                key={`cell-${index}`} 
+                fill={entry.color} 
+                fillOpacity={hoveredIndex === index ? 1 : 0.7} 
+                className="transition-all duration-300 cursor-pointer"
+                stroke={entry.color}
+                strokeWidth={hoveredIndex === index ? 2 : 0}
+              />
             ))}
           </Bar>
         </BarChart>
@@ -107,13 +131,19 @@ const RiskComparisonChart = ({ withoutVal, withVal, colorRisk, colorSafe }: { wi
 };
 
 const AuditReadinessGauge = ({ score, label, color }: { score: number; label: string; color: string }) => {
+  const [isHovered, setIsHovered] = useState(false);
   const data = [
     { name: 'Score', value: score, color: color },
     { name: 'Remaining', value: 100 - score, color: '#f3f4f6' }
   ];
 
   return (
-    <div className="flex flex-col items-center">
+    <div 
+      className="flex flex-col items-center transition-all duration-300"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ transform: isHovered ? 'scale(1.1)' : 'scale(1)' }}
+    >
       <div className="h-24 w-24 relative">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -122,23 +152,28 @@ const AuditReadinessGauge = ({ score, label, color }: { score: number; label: st
               cx="50%"
               cy="50%"
               innerRadius={30}
-              outerRadius={42}
+              outerRadius={isHovered ? 45 : 42}
               paddingAngle={2}
               dataKey="value"
               startAngle={180}
               endAngle={-180}
+              className="transition-all duration-300"
             >
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.color} 
+                  fillOpacity={index === 0 && isHovered ? 1 : 0.8}
+                />
               ))}
             </Pie>
           </PieChart>
         </ResponsiveContainer>
         <div className="absolute inset-0 flex items-center justify-center flex-col">
-          <span className="text-sm font-black font-mono leading-none">{score}%</span>
+          <span className={`text-sm font-black font-mono leading-none transition-colors ${isHovered ? 'text-forest scale-110' : ''}`}>{score}%</span>
         </div>
       </div>
-      <span className="text-[8px] font-bold uppercase tracking-widest mt-1" style={{ color }}>{label}</span>
+      <span className="text-[8px] font-bold uppercase tracking-widest mt-1" style={{ color: isHovered ? '#1B4332' : color }}>{label}</span>
     </div>
   );
 };
