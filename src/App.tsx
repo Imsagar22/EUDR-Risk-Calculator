@@ -22,7 +22,12 @@ import {
   LogOut,
   ChevronDown,
   Activity,
-  Zap
+  Zap,
+  Share2,
+  Mail,
+  Linkedin,
+  Twitter,
+  Link as LinkIcon
 } from 'lucide-react';
 
 import { 
@@ -233,6 +238,89 @@ const AnimatedNumber = ({ value, prefix = "", suffix = "" }: { value: number; pr
   );
 };
 
+const ShareModal = ({ isOpen, onClose, calculations }: { isOpen: boolean; onClose: () => void; calculations: any }) => {
+  const [copied, setCopied] = useState(false);
+
+  const shareText = `I just analyzed my EUDR compliance risk. Potential exposure: €${calculations.totalExposureWithout.toLocaleString()}. Projected savings with TraceX: €${calculations.savings.toLocaleString()}. Check your risk profile here:`;
+  const shareUrl = window.location.href;
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareLinkedIn = () => {
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
+  };
+
+  const shareTwitter = () => {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+  };
+
+  const shareEmail = () => {
+    const subject = encodeURIComponent("EUDR Compliance Risk Analysis");
+    const body = encodeURIComponent(`${shareText}\n\n${shareUrl}`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-ink/60 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <motion.div 
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
+            className="bg-white max-w-sm w-full p-6 rounded-2xl shadow-2xl border border-gray-100"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-forest/10 text-forest rounded-full flex items-center justify-center mx-auto mb-4">
+                <Share2 size={24} />
+              </div>
+              <h3 className="text-lg font-black text-ink uppercase tracking-tight">Share Analysis</h3>
+              <p className="text-xs text-gray-500 mt-1">Spread awareness about EUDR compliance risks.</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <button onClick={shareLinkedIn} className="group flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-all active:scale-95">
+                <Linkedin size={20} className="text-[#0077b5] group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">LinkedIn</span>
+              </button>
+              <button onClick={shareTwitter} className="group flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-all active:scale-95">
+                <Twitter size={20} className="text-[#1da1f2] group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Twitter</span>
+              </button>
+              <button onClick={shareEmail} className="group flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-all active:scale-95">
+                <Mail size={20} className="text-gray-600 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Email</span>
+              </button>
+              <button onClick={copyToClipboard} className="group flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-all active:scale-95">
+                {copied ? <CheckCircle2 size={20} className="text-safe" /> : <LinkIcon size={20} className="text-gray-600 group-hover:scale-110 transition-transform" />}
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{copied ? 'Copied' : 'Copy Link'}</span>
+              </button>
+            </div>
+
+            <button 
+              onClick={onClose}
+              className="w-full py-3 bg-gray-100 text-gray-500 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-gray-200 transition-colors"
+            >
+              Close
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 export default function App() {
   // --- State ---
   const [turnover, setTurnover] = useState<number>(25000000);
@@ -255,6 +343,7 @@ export default function App() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoadingLeads, setIsLoadingLeads] = useState(false);
   const [adminError, setAdminError] = useState<string | null>(null);
+  const [showShare, setShowShare] = useState(false);
 
   const isAdmin = user?.email === 'marketingtracextech@gmail.com';
 
@@ -622,6 +711,14 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
         </div>
         <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 md:gap-4 w-full sm:w-auto">
           <button 
+            onClick={() => setShowShare(true)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-md text-[9px] md:text-[10px] font-bold uppercase tracking-wider transition-colors border border-white/10"
+          >
+            <Share2 size={14} />
+            Share Analysis
+          </button>
+
+          <button 
             onClick={isAdmin ? () => setShowAdmin(true) : handleAdminLogin}
             className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-md text-[9px] md:text-[10px] font-bold uppercase tracking-wider transition-colors border border-white/10"
           >
@@ -654,10 +751,10 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
             </h2>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 w-full">
-            <div className="input-group">
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Annual Turnover (€)</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6 w-full">
+            <div className="input-group min-w-0">
+              <div className="flex items-start justify-between mb-1 gap-2">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Annual Turnover (€)</label>
                 <Tooltip text="Your total annual global turnover. Used to calculate Article 25 fines (capped at 4%)." />
               </div>
               <input 
@@ -673,9 +770,9 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
               <ValidationError message={errors.turnover} />
             </div>
 
-            <div className="input-group">
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Non-Geolocated Goods (€)</label>
+            <div className="input-group min-w-0">
+              <div className="flex items-start justify-between mb-1 gap-2">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Non-Geolocated Goods (€)</label>
                 <Tooltip text="Annual value of EU imports lacking precise GPS coordinates or land-plot verification." />
               </div>
               <input 
@@ -691,9 +788,9 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
               <ValidationError message={errors.riskShipments} />
             </div>
 
-            <div className="input-group">
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Manual Geolocation & Data Collection (Hrs/Month)</label>
+            <div className="input-group min-w-0">
+              <div className="flex items-start justify-between mb-1 gap-2">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Manual Geolocation & Data Collection (Hrs/Month)</label>
                 <Tooltip text="Total monthly hours your team spends manually collecting geolocation data, verifying suppliers, and preparing due diligence statements." />
               </div>
               <input 
@@ -709,9 +806,9 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
               <ValidationError message={errors.staffHours} />
             </div>
 
-            <div className="input-group">
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Staff Hourly Rate (€)</label>
+            <div className="input-group min-w-0">
+              <div className="flex items-start justify-between mb-1 gap-2">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Staff Hourly Rate (€)</label>
                 <Tooltip text="Average fully-loaded hourly cost of staff dedicated to compliance and data verification." />
               </div>
               <input 
@@ -727,9 +824,9 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
               <ValidationError message={errors.hourlyRate} />
             </div>
 
-            <div className="input-group">
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Commodity Category</label>
+            <div className="input-group min-w-0">
+              <div className="flex items-start justify-between mb-1 gap-2">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Commodity Category</label>
                 <Tooltip text="Primary commodity traded. Different goods have varying traceability requirements." />
               </div>
               <select 
@@ -747,9 +844,9 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
               </select>
             </div>
 
-            <div className="input-group">
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Enterprise Scale</label>
+            <div className="input-group min-w-0">
+              <div className="flex items-start justify-between mb-1 gap-2">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Enterprise Scale</label>
                 <Tooltip text="Affects enforcement timelines and reporting complexity under EUDR guidelines." />
               </div>
               <select 
@@ -1001,12 +1098,21 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
         </div>
 
         <div className="w-full md:w-auto flex flex-col items-center md:items-end gap-1 md:gap-2 md:pr-10">
-          <button 
-            onClick={handleDownload}
-            className="w-full md:w-auto bg-forest text-white px-8 py-3 rounded font-black text-[10px] md:text-xs uppercase tracking-widest hover:opacity-90 transition-opacity shadow-md"
-          >
-            Download Report
-          </button>
+          <div className="flex gap-2 w-full md:w-auto">
+            <button 
+              onClick={() => setShowShare(true)}
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white text-forest border-2 border-forest px-6 py-3 rounded font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-forest/5 transition-colors"
+            >
+              <Share2 size={16} />
+              Share
+            </button>
+            <button 
+              onClick={handleDownload}
+              className="flex-1 md:flex-none bg-forest text-white px-8 py-3 rounded font-black text-[10px] md:text-xs uppercase tracking-widest hover:opacity-90 transition-opacity shadow-md"
+            >
+              Download Report
+            </button>
+          </div>
           <p className="text-[7px] md:text-[8px] text-gray-400 uppercase tracking-tighter">Powered by TraceX Regulatory Engine</p>
         </div>
       </footer>
@@ -1207,6 +1313,12 @@ Notes: Calculations based on EU Deforestation Regulation (EU) 2023/1115 penalty 
           <Download size={20} />
         </button>
       </div>
+
+      <ShareModal 
+        isOpen={showShare} 
+        onClose={() => setShowShare(false)} 
+        calculations={calculations} 
+      />
     </div>
   );
 }
